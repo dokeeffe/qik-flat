@@ -1,5 +1,5 @@
 Create a dir called build one dir back from here
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ../quik_flat/
+cmake -DCMAKE_INSTALL_PREFIX=/usr ../quik-flat/
 sudo make install
 

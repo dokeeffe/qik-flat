@@ -233,7 +233,11 @@ bool QikFlat::getStartupData()
 
 bool QikFlat::EnableLightBox(bool enable)
 {    
-    //switch on!!
+    if(enable) {
+        sf->sendStringData((char *)"ON");
+    } else {
+        sf->sendStringData((char *)"OFF");
+    }
 }
 
 bool QikFlat::getStatus()
