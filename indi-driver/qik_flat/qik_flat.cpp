@@ -143,7 +143,7 @@ bool QikFlat::Connect()
 {
     DEBUGF(INDI::Logger::DBG_SESSION, "Attempting connection %s",PortT[0].text);
     sf = new Firmata(PortT[0].text);
-    if (sf->portOpen && strstr(sf->firmata_name, "QikFlatFirmware")) {
+    if (sf->portOpen) { // && strstr(sf->firmata_name, "QikFlatFirmware")) {
         DEBUG(INDI::Logger::DBG_SESSION, "ARDUINO BOARD CONNECTED.");
         DEBUGF(INDI::Logger::DBG_SESSION, "FIRMATA VERSION:%s",sf->firmata_name);
         sf->systemReset();
@@ -215,12 +215,6 @@ bool QikFlat::saveConfigItems(FILE *fp)
     return saveLightBoxConfigItems(fp);
 }
 
-bool QikFlat::ping()
-{    
-    //?????
-    return true;
-}
-
 bool QikFlat::getStartupData()
 {
     bool rc1 = getFirmwareVersion();
@@ -234,20 +228,27 @@ bool QikFlat::getStartupData()
 bool QikFlat::EnableLightBox(bool enable)
 {    
     if(enable) {
+        DEBUG(INDI::Logger::DBG_SESSION, "Switching on light panel");
         sf->sendStringData((char *)"ON");
     } else {
+        DEBUG(INDI::Logger::DBG_SESSION, "Switching off light panel");
         sf->sendStringData((char *)"OFF");
     }
 }
 
 bool QikFlat::getStatus()
 {    
-
+    DEBUG(INDI::Logger::DBG_SESSION, "getStatus");
+    IUSaveText(&StatusT[1], "Off");
+    IDSetText(&StatusTP, NULL);
     return true;
 }
 
 bool QikFlat::getFirmwareVersion()
 {
+    DEBUG(INDI::Logger::DBG_SESSION, "GetFW version");
+    IUSaveText(&FirmwareT[0], sf->firmata_name);
+    IDSetText(&FirmwareTP, NULL);
     //todo get from firmata
     //char versionString[4];
     //snprintf(versionString, 4, "%s", response+4 );
@@ -259,11 +260,11 @@ bool QikFlat::getFirmwareVersion()
 
 void QikFlat::TimerHit()
 {
-    if (isConnected() == false)
+    DEBUG(INDI::Logger::DBG_SESSION, "TimerHit");
+    if (isConnected() == false) {
         return;
-
+    }
     getStatus();
-
     SetTimer(1000);
 }
 
@@ -273,7 +274,8 @@ bool QikFlat::getBrightness()
 }
 
 bool QikFlat::SetLightBoxBrightness(uint16_t value)
-{    
+{
+    DEBUG(INDI::Logger::DBG_SESSION, "SetLightBoxBrightness called: Not supported");
     //not supported, just return true... I think
     return true;
 }
