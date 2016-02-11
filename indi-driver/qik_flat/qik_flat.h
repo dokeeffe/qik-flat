@@ -43,7 +43,6 @@ class QikFlat : public INDI::DefaultDevice, public INDI::LightBoxInterface
 private:
 
     bool getStartupData();
-    bool ping();
     bool getStatus();
     bool getFirmwareVersion();
     bool getBrightness();
@@ -52,17 +51,13 @@ private:
     ITextVectorProperty PortTP;
     IText PortT[1];
 
-    // Status
-    ITextVectorProperty StatusTP;
-    IText StatusT[3];
-
     // Firmware version
     ITextVectorProperty FirmwareTP;
     IText FirmwareT[1];
 
     int PortFD;
     int productID;
-    uint8_t prevLightStatus, prevBrightness;
+    uint8_t prevLightStatus;
     Firmata* sf;
 
 };

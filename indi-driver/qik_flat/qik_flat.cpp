@@ -59,7 +59,7 @@ void ISSnoopDevice (XMLEle *root)
 QikFlat::QikFlat() : LightBoxInterface(this, true)
 {
     setVersion(1,0);
-    prevLightStatus = prevBrightness = 0xFF;
+    prevLightStatus = 0xFF;
 }
 
 QikFlat::~QikFlat()
@@ -74,10 +74,6 @@ bool QikFlat::initProperties()
     // Device port
     IUFillText(&PortT[0],"PORT","Port","/dev/ttyUSB0");
     IUFillTextVector(&PortTP,PortT,1,getDeviceName(),"DEVICE_PORT","Ports",OPTIONS_TAB,IP_RW,60,IPS_IDLE);   
-
-    // Status
-    IUFillText(&StatusT[0],"Light","",NULL);
-    IUFillTextVector(&StatusTP,StatusT,3,getDeviceName(),"Status","",MAIN_CONTROL_TAB,IP_RO,60,IPS_IDLE);
 
     // Firmware version
     IUFillText(&FirmwareT[0],"Version","",NULL);
@@ -113,7 +109,7 @@ bool QikFlat::updateProperties()
     {
         defineSwitch(&LightSP);
         defineNumber(&LightIntensityNP);
-        defineText(&StatusTP);
+        //defineText(&StatusTP);
         defineText(&FirmwareTP);        
 
         updateLightBoxProperties();
@@ -124,7 +120,6 @@ bool QikFlat::updateProperties()
     {
         deleteProperty(LightSP.name);
         deleteProperty(LightIntensityNP.name);
-        deleteProperty(StatusTP.name);
         deleteProperty(FirmwareTP.name);
 
         updateLightBoxProperties();
@@ -218,10 +213,9 @@ bool QikFlat::saveConfigItems(FILE *fp)
 bool QikFlat::getStartupData()
 {
     bool rc1 = getFirmwareVersion();
-    bool rc2 = getStatus();
-    bool rc3 = getBrightness();
+    bool rc2 = getBrightness();
 
-    return (rc1 && rc2 && rc3);
+    return (rc1 && rc2);
 }
 
 
@@ -239,8 +233,6 @@ bool QikFlat::EnableLightBox(bool enable)
 bool QikFlat::getStatus()
 {    
     DEBUG(INDI::Logger::DBG_SESSION, "getStatus");
-    IUSaveText(&StatusT[1], "Off");
-    IDSetText(&StatusTP, NULL);
     return true;
 }
 
@@ -249,12 +241,6 @@ bool QikFlat::getFirmwareVersion()
     DEBUG(INDI::Logger::DBG_SESSION, "GetFW version");
     IUSaveText(&FirmwareT[0], sf->firmata_name);
     IDSetText(&FirmwareTP, NULL);
-    //todo get from firmata
-    //char versionString[4];
-    //snprintf(versionString, 4, "%s", response+4 );
-    //IUSaveText(&FirmwareT[0], versionString);
-    //IDSetText(, NULL);
-
     return true;
 }
 
@@ -270,7 +256,7 @@ void QikFlat::TimerHit()
 
 bool QikFlat::getBrightness()
 {    
-    return false;
+    return true;
 }
 
 bool QikFlat::SetLightBoxBrightness(uint16_t value)
