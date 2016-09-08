@@ -48,8 +48,8 @@ private:
     bool getBrightness();
 
     // Device physical port
-    ITextVectorProperty PortTP;
-    IText PortT[1];
+    //ITextVectorProperty PortTP;
+    //IText PortT[1];
 
     // Firmware version
     ITextVectorProperty FirmwareTP;

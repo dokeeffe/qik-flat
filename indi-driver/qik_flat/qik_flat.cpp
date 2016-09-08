@@ -72,8 +72,8 @@ bool QikFlat::initProperties()
     INDI::DefaultDevice::initProperties();
 
     // Device port
-    IUFillText(&PortT[0],"PORT","Port","/dev/ttyUSB0");
-    IUFillTextVector(&PortTP,PortT,1,getDeviceName(),"DEVICE_PORT","Ports",OPTIONS_TAB,IP_RW,60,IPS_IDLE);   
+    //IUFillText(&PortT[0],"PORT","Port","/dev/ttyUSB0");
+    //IUFillTextVector(&PortTP,PortT,1,getDeviceName(),"DEVICE_PORT","Ports",OPTIONS_TAB,IP_RW,60,IPS_IDLE);   
 
     // Firmware version
     IUFillText(&FirmwareT[0],"Version","",NULL);
@@ -94,8 +94,8 @@ void QikFlat::ISGetProperties (const char *dev)
 {
     INDI::DefaultDevice::ISGetProperties(dev);
 
-    defineText(&PortTP);
-    loadConfig(true, "DEVICE_PORT");
+    //defineText(&PortTP);
+    //loadConfig(true, "DEVICE_PORT");
 
     // Get Light box properties
     isGetLightBoxProperties(dev);
@@ -134,21 +134,32 @@ const char * QikFlat::getDefaultName()
     return (char *)"Qik Flat";
 }
 
+/**
+ * Connect to the usb device, iterate over the first 5 /dev/ttyACMx devices (this assumes the device is a genuine arduino and appears as /dev/ttyACMx)
+ * 
+ **/
 bool QikFlat::Connect()
 {
-    DEBUGF(INDI::Logger::DBG_SESSION, "Attempting connection %s",PortT[0].text);
-    sf = new Firmata(PortT[0].text);
-    if (sf->portOpen) { // && strstr(sf->firmata_name, "QikFlatFirmware")) {
-        DEBUG(INDI::Logger::DBG_SESSION, "ARDUINO BOARD CONNECTED.");
-        DEBUGF(INDI::Logger::DBG_SESSION, "FIRMATA VERSION:%s",sf->firmata_name);
-        sf->systemReset();
-        return true;
-    } else {
-        DEBUG(INDI::Logger::DBG_SESSION, "ARDUINO BOARD FAIL TO CONNECT");
-        delete sf;
-        return false;
+    for( int a = 0; a < 5; a = a + 1 )
+    {
+    	string usbPort = "/dev/ttyACM" +  std::to_string(a);
+    	DEBUGF(INDI::Logger::DBG_SESSION, "Attempting connection %s",usbPort.c_str());
+        sf = new Firmata(usbPort.c_str());
+        if (sf->portOpen && strstr(sf->firmata_name, "LightPanelSwitcher")) {
+    	    DEBUG(INDI::Logger::DBG_SESSION, "ARDUINO BOARD CONNECTED.");
+	    DEBUGF(INDI::Logger::DBG_SESSION, "FIRMATA VERSION:%s",sf->firmata_name);
+	    return true;
+        } else {
+            DEBUG(INDI::Logger::DBG_SESSION,"Failed, trying next port.\n");
+        }
     }
+    DEBUG(INDI::Logger::DBG_SESSION, "ARDUINO BOARD FAIL TO CONNECT");
+    delete sf;
+    return false;
 }
+
+
+
 
 bool QikFlat::Disconnect()
 {
@@ -174,13 +185,13 @@ bool QikFlat::ISNewText (const char *dev, const char *name, char *texts[], char 
         if (processLightBoxText(dev, name, texts, names, n))
             return true;
 
-        if (!strcmp(PortTP.name, name))
-        {
-            IUUpdateText(&PortTP, texts, names, n);
-            PortTP.s = IPS_OK;
-            IDSetText(&PortTP, NULL);
-            return true;
-        }        
+       // if (!strcmp(PortTP.name, name))
+       // {
+        //    IUUpdateText(&PortTP, texts, names, n);
+        //    PortTP.s = IPS_OK;
+        //    IDSetText(&PortTP, NULL);
+        //    return true;
+        //}        
     }
 
     return INDI::DefaultDevice::ISNewText(dev, name, texts, names, n);
@@ -206,7 +217,7 @@ bool QikFlat::ISSnoopDevice (XMLEle *root)
 
 bool QikFlat::saveConfigItems(FILE *fp)
 {
-    IUSaveConfigText(fp, &PortTP);
+    //IUSaveConfigText(fp, &PortTP);
     return saveLightBoxConfigItems(fp);
 }
 
